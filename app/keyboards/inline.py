@@ -4,8 +4,7 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 main = InlineKeyboardMarkup(
     inline_keyboard=[
-        [InlineKeyboardButton(text="📝 Запись в дневнике", callback_data="diary_menu")],
-        [InlineKeyboardButton(text="📈 Моя статистика", callback_data="stats_menu")],
+        [InlineKeyboardButton(text="Каталог", callback_data="catalogue")],
         [InlineKeyboardButton(text="👤 Аккаунт", callback_data="account_menu")],
         [InlineKeyboardButton(text="📞 Контакты", callback_data="contacts")]
     ]
@@ -13,6 +12,7 @@ main = InlineKeyboardMarkup(
 
 account_menu = InlineKeyboardMarkup(
     inline_keyboard=[
+        [InlineKeyboardButton(text="Админ", callback_data="admin_menu")],
         [InlineKeyboardButton(text="🗑️ Удалить аккаунт", callback_data="delete_account_confirmation")],
         [InlineKeyboardButton(text="🏠 Главное меню", callback_data="main_menu")],
     ]
