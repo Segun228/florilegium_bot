@@ -21,6 +21,18 @@ from app.requests.helpers.get_cat_error import get_cat_error_async
 from app.requests.get.get_categories import get_categories
 from app.requests.get.get_post import get_post
 from app.requests.helpers.get_cat_error import get_cat_error_async
+from aiogram.filters import ChatMemberUpdatedFilter, KICKED
+from aiogram.types import ChatMemberUpdated
+
+
+#===========================================================================================================================
+# Валидация блокировки пользователя
+#===========================================================================================================================
+
+@router.my_chat_member(ChatMemberUpdatedFilter(member_status_changed=KICKED))
+async def process_user_blocked_bot(event: ChatMemberUpdated):
+    
+
 #===========================================================================================================================
 # Конфигурация основных маршрутов
 #===========================================================================================================================
