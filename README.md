@@ -65,8 +65,8 @@
 
 1.  **Клонируйте репозиторий:**
     ```bash
-    git clone https://github.com/ваш_юзернейм/название_репозитория.git
-    cd название_репозитория
+    git clone https://github.com/Segun228/florilegium_bot
+    cd florilegium_bot
     ```
 2.  **Создайте и активируйте виртуальное окружение:**
     ```bash
