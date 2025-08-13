@@ -1,4 +1,4 @@
-from app.handlers.router import router
+from app.handlers.router import user_router as router
 import asyncio
 import logging
 import random
@@ -8,21 +8,24 @@ from aiogram import F
 from typing import Dict, Any
 from aiogram.fsm.context import FSMContext
 
-from app.keyboards import inline as inline_keyboards
+from app.keyboards import inline_user as inline_keyboards
 
 from app.states.states import Post
 
 from aiogram.types import BufferedInputFile
 
-from app.keyboards.inline import get_catalogue, get_posts
+from app.keyboards.inline_user import get_catalogue, get_posts
 
 from app.requests.user.login import login
+from app.requests.user.set_blocked import set_blocked
 from app.requests.helpers.get_cat_error import get_cat_error_async
 from app.requests.get.get_categories import get_categories
 from app.requests.get.get_post import get_post
 from app.requests.helpers.get_cat_error import get_cat_error_async
 from aiogram.filters import ChatMemberUpdatedFilter, KICKED
 from aiogram.types import ChatMemberUpdated
+
+from app.filters.IsAdmin import IsAdmin
 
 
 #===========================================================================================================================
@@ -31,21 +34,22 @@ from aiogram.types import ChatMemberUpdated
 
 @router.my_chat_member(ChatMemberUpdatedFilter(member_status_changed=KICKED))
 async def process_user_blocked_bot(event: ChatMemberUpdated):
-    
+    await set_blocked(telegram_id=event.from_user.id, value=False)
 
 #===========================================================================================================================
 # Конфигурация основных маршрутов
 #===========================================================================================================================
 
-@router.message(CommandStart())
+@router.message(CommandStart(), ~IsAdmin())
 async def cmd_start(message: Message, state: FSMContext):
     data = await login(telegram_id=message.from_user.id)
+    await set_blocked(telegram_id=message.from_user.id, value=True)
     if data is None:
         logging.error("Error while logging in")
         await message.answer("Ошибка авторизации, попробуйте позже 😔", reply_markup=inline_keyboards.restart)
         return
     await state.update_data(telegram_id = data.get("telegram_id"))
-    await message.reply("Привет! 👋")
+    await message.reply("Привет, пользователь! 👋")
     await message.reply("Я бот платформы Florilegium. Я помогу вам выбрать и заказать лучшие экзотические растения")
     await message.answer("Я много что умею 👇", reply_markup=inline_keyboards.main)
     await state.clear()

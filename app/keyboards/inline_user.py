@@ -12,7 +12,6 @@ main = InlineKeyboardMarkup(
 
 account_menu = InlineKeyboardMarkup(
     inline_keyboard=[
-        [InlineKeyboardButton(text="Админ", callback_data="admin_menu")],
         [InlineKeyboardButton(text="🗑️ Удалить аккаунт", callback_data="delete_account_confirmation")],
         [InlineKeyboardButton(text="🏠 Главное меню", callback_data="main_menu")],
     ]
