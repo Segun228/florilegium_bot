@@ -24,12 +24,12 @@ async def post_post(telegram_id, category_id, title, description, price, quantit
         exact_url = f"{base_url}api/categories/{category_id}/posts/" 
         logging.debug(f"Sending to {exact_url}")
         data = {
-            "category": category_id,
             "title": title,
             "description": description,
             "price": price,
             "quantity": quantity,
         }
+        print(data)
         async with session.post(
             exact_url, 
             headers=headers,

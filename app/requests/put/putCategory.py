@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 from pprint import pprint
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-async def put_category(telegram_id, category_id, title, description):
+async def put_category(telegram_id, category_id, title, description=""):
     load_dotenv()
     base_url = os.getenv("BASE_URL")
 

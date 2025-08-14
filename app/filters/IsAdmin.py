@@ -27,5 +27,4 @@ class IsAdmin(BaseFilter):
     async def __call__(self, message: Message) -> bool:
         user_id = message.from_user.id
         is_admin = user_id in ADMIN_IDS
-        print(f"Проверка пользователя: {user_id}. Является админом? {is_admin}")
         return is_admin

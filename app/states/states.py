@@ -2,8 +2,18 @@ from aiogram.fsm.state import StatesGroup, State
 
 
 class Category(StatesGroup):
-    pass
-
+    handle_category = State()
+    handle_edit_category = State()
+    name = State()
+    description = State()
+    category_id = State()
 
 class Post(StatesGroup):
-    pass
+    handle_post = State()
+    handle_edit_post = State()
+    category = State()
+    description = State()
+    title = State()
+    price = State()
+    quantity = State()
+    post_id = State()

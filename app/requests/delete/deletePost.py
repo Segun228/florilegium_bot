@@ -27,9 +27,9 @@ async def delete_post(telegram_id, category_id, post_id):
             exact_url, 
             headers=headers,
         ) as response:
-            if response.status in (200, 201, 202, 203):
-                logging.info("категории получены")
-                return response
+            if response.status in (200, 201, 202, 203, 204):
+                logging.info("пост удален")
+                return True
             else:
                 return None
 
