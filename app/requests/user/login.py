@@ -17,7 +17,7 @@ async def login(telegram_id):
         raise ValueError("No telegram_id was provided")
     
     async with aiohttp.ClientSession() as session:
-        async with session.post(base_url+"auth/user/", data={"telegram_id": telegram_id}) as response:
+        async with session.post(base_url+"auth/user/", data={"telegram_id": telegram_id, "is_alive":True}) as response:
             if response.status == 200 or response.status == 201:
                 data = await response.json()
                 logging.info("Данные успешно получены!")
@@ -31,7 +31,7 @@ async def main():
     response_data = await login(telegram_id="6911237041")
     if response_data:
         print("\n--- Результат ---")
-        print(response_data.text())
+        print(response_data)
 
 if __name__ == "__main__":
     asyncio.run(main())

@@ -35,6 +35,9 @@ async def main():
     if response_data:
         print("\n--- Результат ---")
         pprint(response_data)
+    else:
+        print("\n--- Ощибка ---")
+        pprint(response_data)
 
 if __name__ == "__main__":
     asyncio.run(main())
