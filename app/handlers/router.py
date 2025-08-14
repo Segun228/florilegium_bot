@@ -1,3 +1,6 @@
 from aiogram import Router
+from app.filters.IsAdmin import IsAdmin
 
-router = Router()
+admin_router = Router(name="admin")
+user_router = Router(name="user")
+

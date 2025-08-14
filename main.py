@@ -5,8 +5,9 @@ import asyncio
 from aiogram import Bot, Dispatcher
 from dotenv import load_dotenv
 
-from app.handlers.router import router
-import app.handlers.handlers
+from app.handlers.router import admin_router, user_router
+import app.handlers.admin_handlers
+import app.handlers.user_handlers
 from app.middlewares.antiflud import ThrottlingMiddleware
 
 
@@ -23,11 +24,11 @@ if not token or token == "":
 bot:Bot = Bot(token = token)
 dp = Dispatcher()
 dp.message.middleware(ThrottlingMiddleware(limit=0.5))
-
+dp.include_router(admin_router)
+dp.include_router(user_router)
 async def main():
     try:
         logging.info("Bot started")
-        dp.include_router(router)
         await dp.start_polling(bot)
     except KeyboardInterrupt:
         logging.info("Bot stopped")
