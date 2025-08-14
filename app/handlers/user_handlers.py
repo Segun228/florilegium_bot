@@ -76,12 +76,12 @@ async def cmd_help(message: Message):
 
 @router.message(Command("contacts"))
 async def cmd_contacts(message: Message):
-    text = "Связь с разрабом: 📞\n\n\\@dianabol\\_metandienon\\_enjoyer 🤝\n\n[GitHub](https://github.com/Segun228)"
+    text = "Связь с менеджером: 📞\n\n\\@Elena\\_Noro\n\n"+"Связь с разрабом: 📞\n\n\\@dianabol\\_metandienon\\_enjoyer 🤝\n\n[GitHub](https://github.com/Segun228)"
     await message.reply(text=text, reply_markup=inline_keyboards.home, parse_mode='MarkdownV2')
 
 @router.callback_query(F.data == "contacts")
 async def contacts_callback(callback: CallbackQuery):
-    text = "Связь с разрабом: 📞\n\n\\@dianabol\\_metandienon\\_enjoyer 🤝\n\n[GitHub](https://github.com/Segun228)"
+    text = "Связь с менеджером: 📞\n\n\\@Elena\\_Noro\n\n"+"Связь с разрабом: 📞\n\n\\@dianabol\\_metandienon\\_enjoyer 🤝\n\n[GitHub](https://github.com/Segun228)"
     await callback.message.edit_text(text=text, reply_markup=inline_keyboards.home, parse_mode='MarkdownV2')
     await callback.answer()
 
@@ -114,7 +114,7 @@ async def category_catalogue_callback(callback: CallbackQuery):
                 break
     
     if current_category is None or current_category.get("posts") is None or current_category.get("posts") == []:
-        await callback.message.answer("Извините, тут пока пусто, возвращаейтесь позже!", reply_markup= inline_keyboards.catalogue)
+        await callback.message.answer("Извините, тут пока пусто, возвращаейтесь позже! ⏳", reply_markup= inline_keyboards.catalogue)
         await callback.answer()
         return
     await callback.message.answer("Вот доступные предложения👇", reply_markup= await get_posts(category= current_category ,posts = current_category.get("posts", [])))
@@ -131,7 +131,7 @@ async def post_catalogue_callback(callback: CallbackQuery):
         category_id= category_id
     )
     if post_data is None or not post_data:
-        await callback.message.answer("Извините, не удалось получить доступ к объявлению", reply_markup=inline_keyboards.home)
+        await callback.message.answer("Извините, не удалось получить доступ к объявлению 😔", reply_markup=inline_keyboards.home)
         return
     await send_post_photos(callback = callback, post = post_data)
     message_text = (
@@ -180,12 +180,11 @@ async def all_other_messages(message: Message):
         await message.bot.send_photo(chat_id=message.chat.id, photo=photo_to_send)
 
 
-
 async def send_post_photos(callback: CallbackQuery, post: Dict[str, Any]):
     photo_ids = post.get('photos', [])
 
     if not photo_ids:
-        await callback.message.answer("К сожалению, у этого поста нет фотографий.")
+        await callback.message.answer("К сожалению, у этого поста нет фотографий. 🖼️")
         return
 
     first_photo_id = photo_ids[0]
