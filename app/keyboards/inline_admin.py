@@ -92,6 +92,7 @@ async def get_posts(posts, category):
 
 async def get_post_menu(category_id, post_id):
     keyboard = InlineKeyboardBuilder()
+    keyboard.add(InlineKeyboardButton(text="Добавить фото", callback_data=f"add_photo_{post_id}"))
     keyboard.add(InlineKeyboardButton(text="Редактировать пост", callback_data=f"edit_post_{category_id}_{post_id}"))
     keyboard.add(InlineKeyboardButton(text="Удалить пост", callback_data=f"delete_post_{category_id}_{post_id}"))
     keyboard.add(InlineKeyboardButton(text="Каталог", callback_data="catalogue"))

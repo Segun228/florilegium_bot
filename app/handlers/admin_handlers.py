@@ -20,6 +20,7 @@ from app.requests.user.login import login
 from app.requests.helpers.get_cat_error import get_cat_error_async
 from app.requests.get.get_categories import get_categories
 from app.requests.get.get_post import get_post
+from app.requests.post.postPhotos import post_photos
 from app.requests.helpers.get_cat_error import get_cat_error_async
 
 from app.requests.post.postCategory import post_category
@@ -137,7 +138,10 @@ async def post_catalogue_callback_admin(callback: CallbackQuery):
     await callback.message.answer(
         text=message_text,
         parse_mode="MarkdownV2",
-        reply_markup=inline_keyboards.home
+        reply_markup= await inline_keyboards.get_post_menu(
+            category_id= category_id,
+            post_id= post_id,
+        )
     )
 #===========================================================================================================================
 # Поддержка
@@ -397,4 +401,46 @@ async def post_delete_callback_admin(callback: CallbackQuery, state: FSMContext)
     await callback.message.answer("Пост успешно удален",reply_markup=await get_catalogue(telegram_id = callback.from_user.id))
     await state.clear()
 
+#===========================================================================================================================
+# Добавление фото
+#===========================================================================================================================
 
+
+@router.callback_query(F.data.startswith("add_photo_"), IsAdmin())
+async def post_add_photos_callback_admin(callback: CallbackQuery, state: FSMContext):
+    await callback.answer()
+    try:
+        post_id = callback.data.split("_")[2]
+        await state.update_data(post_id=int(post_id))
+    except (IndexError, ValueError):
+        await callback.message.answer("Ошибка: неверный ID поста.", reply_markup=await get_catalogue(telegram_id= callback.from_user.id))
+        await state.clear()
+        return
+    await callback.message.answer("Отправьте фотографии для поста. После того как закончите, напишите 'Готово'.")
+    await state.set_state(Post.waiting_for_photos)
+
+
+@router.message(Post.waiting_for_photos, IsAdmin(), F.photo)
+async def handle_photo_upload_admin(message: Message, state: FSMContext):
+    photo_id = message.photo[-1].file_id
+    data = await state.get_data()
+    photos = data.get("photos", [])
+    photos.append(photo_id)
+    await state.update_data(photos=photos)
+    await message.answer("Фотография добавлена. Отправьте ещё или напишите 'Готово'.")
+
+@router.message(Post.waiting_for_photos, F.text.lower() == "готово", IsAdmin())
+async def finish_photo_upload_admin(message: Message, state: FSMContext):
+    data = await state.get_data()
+    post_id = data.get("post_id")
+    photo_ids = data.get("photos", [])
+    
+    if not photo_ids:
+        await message.answer("Вы не отправили ни одной фотографии. Попробуйте снова.")
+        return
+    response = await post_photos(telegram_id= message.from_user.id ,post_id= post_id, photos= photo_ids)
+    if response:
+        await message.answer("Фотографии успешно добавлены к посту ID!", reply_markup=await get_catalogue(telegram_id=message.from_user.id))
+    else:
+        await message.answer("Извините, не удалось добавить фотографии.")
+    await state.clear()

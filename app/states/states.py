@@ -17,3 +17,4 @@ class Post(StatesGroup):
     price = State()
     quantity = State()
     post_id = State()
+    waiting_for_photos = State()
