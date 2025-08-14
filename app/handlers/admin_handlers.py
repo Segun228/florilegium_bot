@@ -5,10 +5,13 @@ from aiogram.filters import CommandStart, Command, StateFilter
 from aiogram import F
 from typing import Dict, Any
 from aiogram.fsm.context import FSMContext
+from aiogram import Router, Bot
+from aiogram.exceptions import TelegramAPIError
+import asyncio
 
 from app.keyboards import inline_admin as inline_keyboards
 
-from app.states.states import Post, Category
+from app.states.states import Post, Category, Send
 
 from aiogram.types import BufferedInputFile
 
@@ -29,9 +32,11 @@ from app.requests.put.putCategory import put_category
 from app.requests.put.putPost import put_post
 from app.requests.delete.deleteCategory import delete_category
 from app.requests.delete.deletePost import delete_post
+from app.requests.user.get_alive import get_alive
 #===========================================================================================================================
 # Конфигурация основных маршрутов
 #===========================================================================================================================
+
 
 @router.message(CommandStart(), IsAdmin())
 async def cmd_start_admin(message: Message, state: FSMContext):
@@ -443,4 +448,49 @@ async def finish_photo_upload_admin(message: Message, state: FSMContext):
         await message.answer("Фотографии успешно добавлены к посту ID!", reply_markup=await get_catalogue(telegram_id=message.from_user.id))
     else:
         await message.answer("Извините, не удалось добавить фотографии.")
+    await state.clear()
+
+
+#===========================================================================================================================
+# Создание рассылки
+#===========================================================================================================================
+
+@router.callback_query(F.data == "send_menu", IsAdmin())
+async def send_menu_admin(callback: CallbackQuery, state: FSMContext):
+    await state.set_state(Send.handle)
+    await callback.message.answer("Напишите, какое сообщение хотите отправить всем активным пользователям. Будте внимательны, отменить рассылку будет невозможно")
+
+
+@router.message(Send.handle, IsAdmin())
+async def send_admin(message: Message, state: FSMContext, bot: Bot):
+    text = message.text
+    users_data = await get_alive(telegram_id=message.from_user.id)
+
+    if users_data is None or text is None:
+        await message.answer("Ошибка при рассылке, повторите позже", reply_markup=inline_keyboards.catalogue)
+        return
+
+
+    tasks = []
+    for user_data in users_data:
+        user_id = user_data.get("telegram_id")
+        tasks.append(bot.send_message(chat_id=user_id, text=text))
+
+    results = await asyncio.gather(*tasks, return_exceptions=True)
+
+
+    successful_sends = 0
+    failed_sends = 0
+    for result in results:
+        if isinstance(result, TelegramAPIError):
+            print(f"Не удалось отправить сообщение: {result}")
+            failed_sends += 1
+        else:
+            successful_sends += 1
+    
+    final_message = (
+        f"Рассылка завершена. Успешно отправлено: {successful_sends}, "
+        f"не отправлено: {failed_sends}."
+    )
+    await message.answer(final_message, reply_markup=inline_keyboards.main)
     await state.clear()

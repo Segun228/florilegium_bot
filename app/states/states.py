@@ -18,3 +18,8 @@ class Post(StatesGroup):
     quantity = State()
     post_id = State()
     waiting_for_photos = State()
+
+
+class Send(StatesGroup):
+    handle = State()
+    message = State()
