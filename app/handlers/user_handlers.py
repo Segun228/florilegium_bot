@@ -40,7 +40,7 @@ async def process_user_blocked_bot(event: ChatMemberUpdated):
 # Конфигурация основных маршрутов
 #===========================================================================================================================
 
-@router.message(CommandStart(), ~IsAdmin())
+@router.message(CommandStart())
 async def cmd_start(message: Message, state: FSMContext):
     data = await login(telegram_id=message.from_user.id)
     await set_blocked(telegram_id=message.from_user.id, value=True)

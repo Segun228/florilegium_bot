@@ -22,7 +22,7 @@ WEBHOOK_URL = f"https://{os.getenv('RENDER_EXTERNAL_HOSTNAME')}{WEBHOOK_PATH}"
 PORT = int(os.getenv("PORT", 8000))
 
 bot = Bot(token=BOT_TOKEN)
-dp = Dispatcher()
+dp = Dispatcher(bot=bot)
 dp.message.middleware(ThrottlingMiddleware(limit=0.5))
 dp.include_router(admin_router)
 dp.include_router(user_router)
