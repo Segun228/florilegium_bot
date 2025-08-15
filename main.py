@@ -14,6 +14,9 @@ load_dotenv()
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
+if not BOT_TOKEN:
+    raise ValueError("Empty bot token given")
+
 WEBHOOK_PATH = "/webhook"
 WEBHOOK_URL = f"https://{os.getenv('RENDER_EXTERNAL_HOSTNAME')}{WEBHOOK_PATH}"
 PORT = int(os.getenv("PORT", 8000))
@@ -25,10 +28,10 @@ dp.include_router(admin_router)
 dp.include_router(user_router)
 
 
-async def webhook_handler(request: web.Request):
+async def webhook_handler(request):
     update = types.Update(**await request.json())
-    await dp.process_update(update)
-    return web.Response()
+    await dp.feed_update(update=update, bot=bot)
+    return web.Response(text="OK")
 
 async def on_startup(app: web.Application):
     await bot.set_webhook(WEBHOOK_URL)
