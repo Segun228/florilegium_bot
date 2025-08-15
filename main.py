@@ -2,42 +2,47 @@ import os
 import logging
 import asyncio
 
-from aiogram import Bot, Dispatcher
+from aiogram import Bot, Dispatcher, types
+from aiohttp import web
 from dotenv import load_dotenv
 
 from app.handlers.router import admin_router, user_router
-import app.handlers.admin_handlers
-import app.handlers.user_handlers
 from app.middlewares.antiflud import ThrottlingMiddleware
 
-
 load_dotenv()
-logging.basicConfig(
-    level=logging.DEBUG,
-    format="%(asctime)s - %(levelname)s - %(message)s",
-)
 
-token = os.getenv("BOT_TOKEN")
-if not token or token == "":
-    raise ValueError("No token was provided")
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
-bot:Bot = Bot(token = token)
+BOT_TOKEN = os.getenv("BOT_TOKEN")
+WEBHOOK_PATH = "/webhook"
+WEBHOOK_URL = f"https://{os.getenv('RENDER_EXTERNAL_HOSTNAME')}{WEBHOOK_PATH}"
+PORT = int(os.getenv("PORT", 8000))
+
+bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher()
 dp.message.middleware(ThrottlingMiddleware(limit=0.5))
 dp.include_router(admin_router)
 dp.include_router(user_router)
-async def main():
-    try:
-        logging.info("Bot started")
-        await dp.start_polling(bot)
-    except KeyboardInterrupt:
-        logging.info("Bot stopped")
-    except ValueError as e:
-        logging.error(e)
-    except Exception as e:
-        logging.error(e)
 
 
+async def webhook_handler(request: web.Request):
+    update = types.Update(**await request.json())
+    await dp.process_update(update)
+    return web.Response()
+
+async def on_startup(app: web.Application):
+    await bot.set_webhook(WEBHOOK_URL)
+    logging.info(f"Webhook set to {WEBHOOK_URL}")
+
+async def on_shutdown(app: web.Application):
+    logging.info("Shutting down...")
+    await bot.session.close()
+    await bot.delete_webhook()
+
+app = web.Application()
+app.router.add_post(WEBHOOK_PATH, webhook_handler)
+app.on_startup.append(on_startup)
+app.on_shutdown.append(on_shutdown)
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    web.run_app(app, port=PORT)
