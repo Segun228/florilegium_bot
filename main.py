@@ -37,6 +37,7 @@ dp.include_router(user_router)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    await bot.delete_webhook(drop_pending_updates=True)
     await bot.set_webhook(WEBHOOK_URL)
     logging.info(f"Webhook set to {WEBHOOK_URL}")
     yield
