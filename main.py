@@ -38,6 +38,7 @@ def main() -> None:
     web.run_app(app, port=PORT)
 
 async def webhook_handler(request):
+    logging.info("Incoming webhook hit")
     update = types.Update(**await request.json())
     await dp.feed_update(update=update, bot=bot)
     return web.Response(text="OK")
