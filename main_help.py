@@ -1,5 +1,4 @@
 import os
-import sys
 import logging
 import asyncio
 
@@ -12,7 +11,7 @@ from app.middlewares.antiflud import ThrottlingMiddleware
 
 load_dotenv()
 
-logging.basicConfig(level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s")
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 if not BOT_TOKEN:
@@ -22,20 +21,12 @@ WEBHOOK_PATH = "/webhook"
 WEBHOOK_URL = f"https://{os.getenv('RENDER_EXTERNAL_HOSTNAME')}{WEBHOOK_PATH}"
 PORT = int(os.getenv("PORT", 8000))
 
-
 bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher()
+dp.message.middleware(ThrottlingMiddleware(limit=0.5))
+dp.include_router(admin_router)
+dp.include_router(user_router)
 
-def main() -> None:
-    dp.message.middleware(ThrottlingMiddleware(limit=0.5))
-    dp.include_router(admin_router)
-    dp.include_router(user_router)
-    dp.startup.register(on_startup)
-    app = web.Application()
-    app.router.add_post(WEBHOOK_PATH, webhook_handler)
-    app.on_startup.append(on_startup)
-    app.on_shutdown.append(on_shutdown)
-    web.run_app(app, port=PORT)
 
 async def webhook_handler(request):
     update = types.Update(**await request.json())
@@ -51,6 +42,14 @@ async def on_shutdown(app: web.Application):
     await bot.session.close()
     await bot.delete_webhook()
 
+def main()->None:
+
+
+
+app = web.Application()
+app.router.add_post(WEBHOOK_PATH, webhook_handler)
+app.on_startup.append(on_startup)
+app.on_shutdown.append(on_shutdown)
+
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
-    main()
+    web.run_app(app, port=PORT)
