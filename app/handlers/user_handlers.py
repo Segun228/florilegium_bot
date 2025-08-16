@@ -61,7 +61,7 @@ async def callback_start(callback: CallbackQuery, state: FSMContext):
     data = await login(telegram_id=callback.from_user.id)
     if data is None:
         logging.error("Error while logging in")
-        await callback.message.answer("Ошибка авторизации, попробуйте позже 😔", reply_markup=inline_keyboards.restart)
+        await callback.message.answer("Бот еще не проснулся, подождите немного пожалуйста 😔", reply_markup=inline_keyboards.restart)
         return
     await state.update_data(telegram_id = data.get("telegram_id"))
     await callback.message.reply("Привет! 👋")
