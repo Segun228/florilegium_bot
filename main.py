@@ -7,12 +7,24 @@ from aiogram import Bot, Dispatcher, types
 
 from app.handlers.router import admin_router, user_router
 from app.middlewares.antiflud import ThrottlingMiddleware
+from dotenv import load_dotenv
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+import app.handlers.admin_handlers
+import app.handlers.user_handlers
+
+load_dotenv()
+logging.basicConfig(level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s")
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
+
+
 WEBHOOK_PATH = "/webhook"
-WEBHOOK_URL = f"https://{os.getenv('RENDER_EXTERNAL_HOSTNAME')}{WEBHOOK_PATH}"
+RENDER_EXTERNAL_HOSTNAME = os.getenv("RENDER_EXTERNAL_HOSTNAME")
+if not RENDER_EXTERNAL_HOSTNAME:
+    logging.warning("RENDER_EXTERNAL_HOSTNAME is not set. Webhook URL might be incorrect on local run (e.g., if using ngrok).")
+    WEBHOOK_URL = f"https://florilegium-bot.onrender.com{WEBHOOK_PATH}"
+else:
+    WEBHOOK_URL = f"https://{os.getenv('RENDER_EXTERNAL_HOSTNAME')}{WEBHOOK_PATH}"
 if not BOT_TOKEN:
     logging.error("No token provided")
     raise ValueError("No token provided")
